@@ -5,7 +5,7 @@ export default function App() {
   const [pieces, setPieces] = useState([]);
   const rows = 4;
   const cols = 4;
-  const pieceSize = 80; // tamaño de cada pieza en px
+  const pieceSize = 100; // tamaño aumentado para mejor visibilidad
   const boardSize = pieceSize * cols;
   const [draggedPiece, setDraggedPiece] = useState(null);
 
@@ -33,11 +33,11 @@ export default function App() {
         newPieces.push({
           id: id++,
           originalPosition: { row, col },
-          currentPosition: id - 1, // posición actual en el array
           style: {
             backgroundImage: `url(${image})`,
             backgroundSize: `${boardSize}px ${boardSize}px`,
             backgroundPosition: `-${col * pieceSize}px -${row * pieceSize}px`,
+            backgroundRepeat: 'no-repeat',
           },
         });
       }
@@ -104,32 +104,105 @@ export default function App() {
     });
   };
 
+  const containerStyle = {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+    color: 'white',
+    padding: '24px',
+    fontFamily: 'system-ui, -apple-system, sans-serif'
+  };
+
+  const puzzleBoardStyle = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${cols}, ${pieceSize}px)`,
+    gridTemplateRows: `repeat(${rows}, ${pieceSize}px)`,
+    gap: '2px',
+    border: '4px solid #fbbf24',
+    borderRadius: '12px',
+    backgroundColor: '#374151',
+    padding: '8px',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    width: `${boardSize + 20}px`,
+    height: `${boardSize + 20}px`
+  };
+
+  const pieceStyle = (piece) => ({
+    width: `${pieceSize}px`,
+    height: `${pieceSize}px`,
+    border: '1px solid #111827',
+    cursor: 'move',
+    transition: 'all 0.2s ease',
+    opacity: draggedPiece?.id === piece.id ? 0.5 : 1,
+    transform: draggedPiece?.id === piece.id ? 'scale(0.95)' : 'scale(1)',
+    ...piece.style
+  });
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+    <div style={containerStyle}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ 
+          fontSize: '2.25rem', 
+          fontWeight: 'bold', 
+          marginBottom: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px'
+        }}>
           🧩 Puzzle Interactivo
         </h1>
-        <p className="text-gray-300">Sube una imagen y resuelve el puzzle arrastrando las piezas</p>
+        <p style={{ color: '#d1d5db' }}>Sube una imagen y resuelve el puzzle arrastrando las piezas</p>
       </div>
 
-      <div className="flex flex-col items-center gap-4 mb-8">
-        <div className="flex flex-col items-center gap-2">
-          <label className="block text-sm font-medium text-gray-300">
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        gap: '16px', 
+        marginBottom: '32px' 
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <label style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db' }}>
             Selecciona una imagen:
           </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer"
+            style={{
+              display: 'block',
+              width: '100%',
+              fontSize: '14px',
+              color: '#d1d5db',
+              backgroundColor: 'transparent',
+              border: '2px solid #374151',
+              borderRadius: '8px',
+              padding: '8px'
+            }}
           />
         </div>
 
         {image && (
           <button
             onClick={generatePuzzle}
-            className="bg-green-600 hover:bg-green-700 transition-colors px-6 py-2 rounded-lg font-semibold shadow-lg"
+            style={{
+              backgroundColor: '#059669',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#047857'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#059669'}
           >
             Generar Puzzle ({rows}x{cols})
           </button>
@@ -138,34 +211,40 @@ export default function App() {
 
       {/* Vista previa de la imagen original */}
       {image && (
-        <div className="mb-6">
-          <p className="text-sm text-gray-400 mb-2 text-center">Imagen original:</p>
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Imagen original:</p>
           <img
             src={image}
             alt="Original"
-            className="max-w-48 max-h-48 object-contain border-2 border-gray-600 rounded-lg"
+            style={{
+              maxWidth: '200px',
+              maxHeight: '200px',
+              objectFit: 'contain',
+              border: '2px solid #4b5563',
+              borderRadius: '8px'
+            }}
           />
         </div>
       )}
 
       {/* Contenedor del puzzle */}
       {pieces.length > 0 && (
-        <div className="flex flex-col items-center">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {isPuzzleSolved() && (
-            <div className="mb-4 p-3 bg-green-600 text-white rounded-lg font-semibold animate-pulse">
+            <div style={{
+              marginBottom: '16px',
+              padding: '12px',
+              backgroundColor: '#059669',
+              color: 'white',
+              borderRadius: '8px',
+              fontWeight: '600',
+              animation: 'pulse 2s infinite'
+            }}>
               🎉 ¡Felicidades! ¡Puzzle resuelto!
             </div>
           )}
           
-          <div
-            className="grid border-4 border-yellow-400 bg-gray-700 rounded-lg shadow-2xl gap-0.5 p-2"
-            style={{
-              width: `${boardSize + 16}px`,
-              height: `${boardSize + 16}px`,
-              gridTemplateColumns: `repeat(${cols}, ${pieceSize}px)`,
-              gridTemplateRows: `repeat(${rows}, ${pieceSize}px)`,
-            }}
-          >
+          <div style={puzzleBoardStyle}>
             {pieces.map((piece, index) => (
               <div
                 key={piece.id}
@@ -174,25 +253,29 @@ export default function App() {
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, piece)}
                 onDragEnd={handleDragEnd}
-                className={`
-                  border border-gray-900 cursor-move transition-all duration-200 hover:scale-105 hover:shadow-lg
-                  ${draggedPiece?.id === piece.id ? 'opacity-50 scale-95' : ''}
-                `}
-                style={{
-                  width: `${pieceSize}px`,
-                  height: `${pieceSize}px`,
-                  backgroundImage: piece.style.backgroundImage,
-                  backgroundSize: piece.style.backgroundSize,
-                  backgroundPosition: piece.style.backgroundPosition,
-                  backgroundRepeat: 'no-repeat',
+                style={pieceStyle(piece)}
+                onMouseOver={(e) => {
+                  if (draggedPiece?.id !== piece.id) {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (draggedPiece?.id !== piece.id) {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = 'none';
+                  }
                 }}
               />
             ))}
           </div>
           
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-400">
+          <div style={{ marginTop: '16px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: '#9ca3af' }}>
               Arrastra las piezas para intercambiar posiciones
+            </p>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+              Total de piezas: {pieces.length}
             </p>
           </div>
         </div>
